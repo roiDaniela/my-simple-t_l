@@ -166,6 +166,7 @@ def teacher_even(s):
 
 
 if __name__ == "__main__":
+    # counterexample
     exs = ["ab", "abab"]
 
     sys.stdout = open('test.html', 'w')

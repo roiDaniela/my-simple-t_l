@@ -24,6 +24,31 @@ class Learner:
                 rows_trans.append(r + a)
         return rows_trans
 
+    def learn(self, exs=[]):
+        print("<html>")
+        self.print_table()
+        print("<hr/>")
+        while True:
+            # check closed and consistent
+            self.update()
+            self.print_table()
+            print("status:%s" % self.status)
+            print("<hr/>")
+            if self.status == "ok":
+                if len(exs) == 0:
+                    break
+                else:
+                    # get counterexample
+                    ex = exs.pop(0)
+                    for i in range(len(ex)):
+                        prefix = ex[:i]
+                        if self.rows.count(prefix) == 0:
+                            print("<p>Adding %s into the table.</p>" % prefix)
+                            self.rows.append(prefix)
+                        self.table = self.make_table(self.rows, self.columns)
+                    print("<hr/>")
+        print("</html>")
+
     def update(self):
         rows_trans = self.make_rows_trans()
         table_trans = self.make_table(rows_trans, self.columns)
@@ -31,11 +56,14 @@ class Learner:
         for rt in rows_trans:
             found = False
             for r in self.rows:
+                # self.table is the states and table_trans is the input language option
+                # check if there is a row(s1·a) in S.A is different from all s in S
                 if self.get_row(table_trans, rt) == self.get_row(self.table, r):
                     found = True
                     break
             if not found:
                 # not closed
+                # To resolve this add s1·a to S
                 self.rows.append(rt)
                 self.table = self.make_table(self.rows, self.columns)
                 self.status = "not closed (%s; %s)" % (r, rt)
@@ -44,12 +72,14 @@ class Learner:
         # closed
         # is consistent?
         for i in range(len(self.rows)):
-            for j in range(i + 1, len(self.rows)):
+            for j in range(i+1, len(self.rows)):
+                # There exist a certain combination of s1 and s2 in S, e in E, and a in A such that row(s1) = row(s2) but T(s1·a·e)6=T(s2·a·e)
                 if self.get_row(self.table, self.rows[i]) == self.get_row(self.table, self.rows[j]):
                     for a in self.alphabets:
-                        if self.get_row(table_trans, self.rows[i] + a) != self.get_row(table_trans, self.rows[j] + a):
-                            # incosnsitent!
-                            newcol = [c + a for c in self.columns]
+                        if self.get_row(table_trans, self.rows[i]+a) != self.get_row(table_trans, self.rows[j]+a):
+                            #incosnsitent!
+                            # To resolve this add a·e to E
+                            newcol = [c+a for c in self.columns]
                             self.columns += newcol
                             self.status = "not consistent (%s, %s; %s)" % (self.rows[i], self.rows[j], a)
                             self.table = self.make_table(self.rows, self.columns)
@@ -103,29 +133,6 @@ class Learner:
             print("</tr>")
         print("</tbody>")
         print("</table>")
-
-    def learn(self, exs=[]):
-        print("<html>")
-        self.print_table()
-        print("<hr/>")
-        while True:
-            self.update()
-            self.print_table()
-            print("status:%s" % self.status)
-            print("<hr/>")
-            if self.status == "ok":
-                if len(exs) == 0:
-                    break
-                else:
-                    ex = exs.pop(0)
-                    for i in range(len(ex)):
-                        prefix = ex[:i]
-                        if self.rows.count(prefix) == 0:
-                            print("<p>Adding %s into the table.</p>" % prefix)
-                            self.rows.append(prefix)
-                        self.table = self.make_table(self.rows, self.columns)
-                    print("<hr/>")
-        print("</html>")
 
     def draw(self):
         d = graphviz.Digraph()

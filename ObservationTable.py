@@ -116,16 +116,6 @@ class ObservationTable:
                 t[(row, col)] = ask_teacher_about_string(row + col)
         return t
 
-    ''' HELPER FUNCTIONS'''
-    # get entry r in table t
-    def get_row(self, t, r):
-        return [t[(r, c)] for c in self.columns]
-
-    # get entry r in table t for view
-    def get_row_as_str(self, t, r):
-        return "".join(["1" if x else "0" for x in self.get_row(t, r)])
-    '''END HELPER FUNCTIONS'''
-
     # calculate all concats of S{a,b}
     # self.rows + alphabet
     def make_rows_trans(self):
@@ -135,6 +125,30 @@ class ObservationTable:
                 rows_trans.append(r + a)
         return rows_trans
 
+    # Learner adds ex and its prefixes to his set self.rows (S)
+    def add_counterexample_to_table(self, teacher, ex):
+        for i in range(len(ex)):
+            prefix = ex[:i]
+            if self.rows.count(prefix) == 0:
+                print("<p>Adding %s into the table.</p>" % prefix)
+                self.rows.append(prefix)
+            # update table
+            self.table = self.make_table(teacher)
+
+    ''' 
+        HELPER FUNCTIONS
+    '''
+    # get entry r in table t
+    def get_row(self, t, r):
+        return [t[(r, c)] for c in self.columns]
+
+    # get entry r in table t for view
+    def get_row_as_str(self, t, r):
+        return "".join(["1" if x else "0" for x in self.get_row(t, r)])
+
+    """
+        THIS FUNCTIONS ARE FOR VIEW ONLY AND CAN BE IGNORED
+    """
     def print_table(self, teacher):
         rows_trans = []
         for r in self.rows:
@@ -207,13 +221,3 @@ class ObservationTable:
                 done.add((src_str, dest_str, a))
                 # print("hoge")
         return d
-
-    # Learner adds ex and its prefixes to his set self.rows (S)
-    def add_counterexample_to_table(self, teacher, ex):
-        for i in range(len(ex)):
-            prefix = ex[:i]
-            if self.rows.count(prefix) == 0:
-                print("<p>Adding %s into the table.</p>" % prefix)
-                self.rows.append(prefix)
-            # update table
-            self.table = self.make_table(teacher)

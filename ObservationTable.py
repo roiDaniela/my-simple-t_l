@@ -25,7 +25,7 @@ import sys
 # in this class
 # self.rows is S
 # self.columns is E
-# self.table is ths automaton
+# self.table is the automaton
 
 class ObservationTable:
     def __init__(self, t, a="ab"):
@@ -42,8 +42,8 @@ class ObservationTable:
         '''
 
         # self.table is the states table, and table_trans is the input language option
-        # get all row(s1.a)
-        # [s1 belongs to (S) self.rows and a belongs to alphabet (A) in S.A]
+        # get all possible options for rows (s1.a)
+        # [s1 belongs to (S) self.rows and a belongs to alphabet (A)]
         rows_trans = self.make_rows_trans()
         # makes membership queries to obtain the table_trans:
         table_trans = self.make_table(teacher, rows_trans, self.columns)
@@ -77,15 +77,15 @@ class ObservationTable:
         '''
 
         # self.table is the states table, and table_trans is the input language option
-        # get all row(s1.a)
-        # [s1 belongs to (S) self.rows and a belongs to alphabet (A) in S.A]
+        # get all possible options for rows (s1.a)
+        # [s1 belongs to (S) self.rows and a belongs to alphabet (A)]
         rows_trans = self.make_rows_trans()
         # makes membership queries to obtain the table_trans:
         table_trans = self.make_table(teacher, rows_trans, self.columns)
 
         # is closed?
         # not closed means that there is a row(s1·a) s1 belongs to self.rows (S) and a belongs to alphabet (A) in S.A
-        # with different result from all results for s in S
+        # with different result from all results for T(s) in self.rows (S)
         for rt in rows_trans:
             found = False
             for r in self.rows:
@@ -117,14 +117,17 @@ class ObservationTable:
         return t
 
     ''' HELPER FUNCTIONS'''
+    # get entry r in table t
     def get_row(self, t, r):
         return [t[(r, c)] for c in self.columns]
 
+    # get entry r in table t for view
     def get_row_as_str(self, t, r):
         return "".join(["1" if x else "0" for x in self.get_row(t, r)])
     '''END HELPER FUNCTIONS'''
 
-    # calculate S{a,b} rows
+    # calculate all concats of S{a,b}
+    # self.rows + alphabet
     def make_rows_trans(self):
         rows_trans = []
         for r in self.rows:
@@ -205,11 +208,12 @@ class ObservationTable:
                 # print("hoge")
         return d
 
-    # Learner adds ex and its prefixes to his set S,
+    # Learner adds ex and its prefixes to his set self.rows (S)
     def add_counterexample_to_table(self, teacher, ex):
         for i in range(len(ex)):
             prefix = ex[:i]
             if self.rows.count(prefix) == 0:
                 print("<p>Adding %s into the table.</p>" % prefix)
                 self.rows.append(prefix)
+            # update table
             self.table = self.make_table(teacher)

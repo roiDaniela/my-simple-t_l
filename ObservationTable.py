@@ -2,6 +2,8 @@ import graphviz
 import sys
 
 # Observation Table example:
+#
+#                            e
 #####################################
 # S          #       e      #TRUE
 #####################################
